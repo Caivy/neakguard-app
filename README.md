@@ -15,7 +15,7 @@ The Broker and the Inspector do the protection work. They are not open source. `
 
 ## Build and test
 
-Use rustup stable, Node.js 24, and pnpm. On Linux, install the Tauri build dependencies listed in the CI workflow, including WebKitGTK 4.1.
+Use rustup stable, Node.js 24, and pnpm. On Linux, install the Tauri build dependencies, including WebKitGTK 4.1 (on Arch: `sudo pacman -S webkit2gtk-4.1 libayatana-appindicator librsvg xdotool`).
 
 ```sh
 (cd app && pnpm install --frozen-lockfile && pnpm test && pnpm build)
