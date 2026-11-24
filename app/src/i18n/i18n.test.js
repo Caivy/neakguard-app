@@ -24,3 +24,24 @@ test('NeakGuard App message references exist in both languages', () => {
     }
   }
 })
+
+test('every state of a Held Attachment has a message in both languages', () => {
+  for (const locale of ['en', 'km']) {
+    const messages = readLocale(locale)
+    for (const key of ['holdChecking', 'holdSuspicious', 'holdUninspected', 'holdUnprotected']) {
+      assert.equal(typeof messages[key], 'string', `${locale}.${key}`)
+    }
+    // A file that is not held has no reason to show.
+    assert.doesNotMatch(messages.holdUnprotected, /\{\w+\}/, locale)
+  }
+})
+
+test('every reason an Attachment can stay Uninspected has a message in both languages', () => {
+  // The Broker reports these names. The NeakGuard App looks them up as `reason<Name>`.
+  const reasons = ['Encrypted', 'Partial', 'Unsupported', 'Nested', 'Failed', 'Memory', 'Cpu', 'Deadline', 'TooLarge']
+  for (const locale of ['en', 'km']) {
+    const messages = readLocale(locale)
+    for (const reason of reasons) assert.equal(typeof messages[`reason${reason}`], 'string', `${locale}.reason${reason}`)
+    assert.match(messages.holdUninspected, /\{reason\}/, locale)
+  }
+})

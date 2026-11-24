@@ -21,8 +21,22 @@ pub mod windows {
         pub folder: Option<PathBuf>,
         /// The Broker opened the Watched Folder and verified the Inspector sandbox.
         pub running: bool,
-        /// An operational failure reported by the Broker.
+        /// A problem of the Broker itself.
         pub error: Option<String>,
+        /// The Attachments in a Hold. Always empty in this build.
+        #[serde(default)]
+        pub held: Vec<HeldFile>,
+    }
+
+    /// One Attachment in a Hold, as the NeakGuard App lists it.
+    #[derive(Serialize, Deserialize, PartialEq, Eq)]
+    pub struct HeldFile {
+        /// Where the Attachment is in the Watched Folder.
+        pub path: PathBuf,
+        /// The Attachment's file name.
+        pub name: String,
+        /// The version of the Attachment. Open Anyway applies to this version only.
+        pub fingerprint: String,
     }
 
     /// One Attachment available for Restore.
@@ -60,5 +74,15 @@ pub mod windows {
     /// Restore an Attachment. Always fails in this build.
     pub fn restore(_state: &Path, _id: &str) -> anyhow::Result<()> {
         bail!(UNAVAILABLE)
+    }
+
+    /// Record Open Anyway for a held Attachment. Always fails in this build.
+    pub fn open_anyway_held(_state: &Path, _fingerprint: &str) -> anyhow::Result<()> {
+        bail!(UNAVAILABLE)
+    }
+
+    /// Save the language of the NeakGuard App. Does nothing in this build.
+    pub fn set_language(_state: &Path, _code: &str) -> anyhow::Result<()> {
+        Ok(())
     }
 }

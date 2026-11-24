@@ -6,6 +6,7 @@
   import './design.css'
   import './app.css'
   import Icon from './Icon.svelte'
+  import { canOpenAnyway, heldFilesOf, holdMessageKey } from './held.js'
   import en from './i18n/en.json'
   import km from './i18n/km.json'
 
@@ -23,6 +24,11 @@
   let detailsDialog = $state()
   let restoreDialog = $state()
   let restoreTarget = $state(null)
+  let openAnywayDialog = $state()
+  let openAnywayTarget = $state(null)
+  let openRequested = $state({})
+  let view = $state('held')
+  let heldPage = $state(0)
   let detailText = $state('')
   const strings = $derived(language === 'km' ? km : en)
   const home = $derived(step === 4)
@@ -31,6 +37,14 @@
   const pageCount = $derived(Math.max(1, Math.ceil(quarantine.length / 4)))
   const currentPage = $derived(Math.min(page, pageCount - 1))
   const visibleAttachments = $derived(quarantine.slice(currentPage * 4, (currentPage + 1) * 4))
+  // The Broker still holds these files while it reports an operational error, so keep them listed.
+  const heldFiles = $derived(heldFilesOf(status))
+  const heldPageCount = $derived(Math.max(1, Math.ceil(heldFiles.length / 3)))
+  const currentHeldPage = $derived(Math.min(heldPage, heldPageCount - 1))
+  const visibleHeld = $derived(heldFiles.slice(currentHeldPage * 3, (currentHeldPage + 1) * 3))
+  const showing = $derived(heldFiles.length && (view === 'held' || !quarantine.length) ? 'held' : quarantine.length ? 'quarantine' : 'empty')
+  const reasonText = (reason) => strings[`reason${reason}`] ?? strings.reasonFailed
+  const heldStatus = (file) => strings[holdMessageKey(file)].replace('{reason}', reasonText(file.reason))
   const number = (value) => language === 'km' ? String(value).replace(/\d/g, (digit) => '០១២៣៤៥៦៧៨៩'[digit]) : String(value)
   const progress = (template, current, total) => template.replace('{current}', number(current)).replace('{total}', number(total))
   const displayFolder = (path) => path.replace(/^\\\\\?\\([a-z]:)/i, '$1')
@@ -44,6 +58,7 @@
       }).catch(() => { /* The native picker remains available when detection fails. */ })
     }
     if (!supported) return
+    saveLanguage()
     initialize()
     const timer = setInterval(() => { if (home && !busy) refresh() }, 2500)
     return () => clearInterval(timer)
@@ -69,6 +84,14 @@
   function setLanguage(value) {
     language = value
     localStorage.setItem('neakguard.language', value)
+    saveLanguage()
+  }
+
+  // The Broker shows its notifications in the language of the NeakGuard App. It cannot read
+  // the web view storage, so the App hands the language over. A failure leaves the Broker on
+  // English or on the language that it knew before.
+  function saveLanguage() {
+    if (supported) invoke('set_language', { language }).catch(() => {})
   }
 
   function showDetails(text) {
@@ -116,6 +139,25 @@
     restoreDialog.showModal()
   }
 
+  function confirmOpenAnyway(file) {
+    openAnywayTarget = file
+    openAnywayDialog.showModal()
+  }
+
+  async function openAnyway() {
+    if (busy || !openAnywayTarget) return
+    const { fingerprint } = openAnywayTarget
+    openAnywayDialog.close()
+    busy = true
+    error = ''
+    try {
+      await invoke('open_anyway', { fingerprint })
+      openRequested = { ...openRequested, [fingerprint]: true }
+      await refresh()
+    } catch (cause) { error = String(cause) }
+    finally { busy = false }
+  }
+
   async function restoreAttachment() {
     if (busy || !restoreTarget) return
     const id = restoreTarget.id
@@ -127,6 +169,15 @@
     finally { busy = false }
   }
 </script>
+
+{#snippet tabs()}
+  {#if heldFiles.length && quarantine.length}
+    <div class="tabs" role="group" aria-label={strings.title}>
+      <button class:on={showing === 'held'} aria-pressed={showing === 'held'} onclick={() => view = 'held'}>{strings.tabHeld} · {number(heldFiles.length)}</button>
+      <button class:on={showing === 'quarantine'} aria-pressed={showing === 'quarantine'} onclick={() => view = 'quarantine'}>{strings.tabQuarantine} · {number(quarantine.length)}</button>
+    </div>
+  {/if}
+{/snippet}
 
 <main class="win">
   <aside class="guard">
@@ -208,9 +259,26 @@
     {:else if step === 3}
       <h2 class="ready-title">{strings.readyTitle}</h2><p class="lead intro-lead">{strings.remember}</p>
       <div class="found tip"><span class="fi"><Icon name="timer" size={28} /></span><div><b>{strings.waitTitle}</b><p>{strings.waitText}</p></div></div>
+      <p class="platform-note">{strings.holdGap}</p>
       {#if !supported}<p class="platform-note">{strings.windowsOnly}</p>{/if}
       <div class="actions"><button class="btn primary" disabled={busy || !supported} onclick={configureFolder}>{busy ? strings.working : strings.start}</button><button class="btn quiet" disabled={busy} onclick={() => step = 2}>{strings.back}</button></div>
-    {:else if quarantine.length}
+    {:else if showing === 'held'}
+      {@render tabs()}
+      <div class="list-head"><h2>{strings.holdTitle}</h2><span class="count held-count">{number(heldFiles.length)}</span></div>
+      <p class="list-sub">{strings.holdText}</p>
+      <ul class="items">
+        {#each visibleHeld as file (file.path + file.fingerprint)}
+          <li class="item"><span class="fic held"><Icon name={file.state === 'unprotected' ? 'info' : 'timer'} size={22} /></span><div class="attachment"><div class="n" title={file.name}>{file.name}</div><div class="w">{heldStatus(file)}</div>{#if file.detail}<button class="link-btn" onclick={() => showDetails(file.detail)}>{strings.details}</button>{/if}</div>
+            {#if canOpenAnyway(file)}
+              {#if openRequested[file.fingerprint]}<span class="w">{strings.holdOpening}</span>{:else}<button class="btn danger" disabled={busy} onclick={() => confirmOpenAnyway(file)}>{strings.openAnyway}</button>{/if}
+            {/if}
+          </li>
+        {/each}
+      </ul>
+      <p class="platform-note">{strings.holdGap}</p>
+      <nav class="pager" aria-label={strings.holdTitle}><span>{progress(strings.page, currentHeldPage + 1, heldPageCount)}</span><div class="pb"><button disabled={currentHeldPage === 0} onclick={() => heldPage = currentHeldPage - 1}>{strings.previous}</button><button disabled={currentHeldPage === heldPageCount - 1} onclick={() => heldPage = currentHeldPage + 1}>{strings.nextPage}</button></div></nav>
+    {:else if showing === 'quarantine'}
+      {@render tabs()}
       <div class="list-head"><h2>{strings.quarantine}</h2><span class="count">{number(quarantine.length)}</span></div>
       <p class="list-sub">{protecting ? strings.quarantineText : strings.quarantineStopped}</p>
       <ul class="items">
@@ -220,7 +288,7 @@
       </ul>
       <nav class="pager" aria-label={strings.quarantine}><span>{progress(strings.page, currentPage + 1, pageCount)}</span><div class="pb"><button disabled={currentPage === 0} onclick={() => page = currentPage - 1}>{strings.previous}</button><button disabled={currentPage === pageCount - 1} onclick={() => page = currentPage + 1}>{strings.nextPage}</button></div></nav>
     {:else}
-      <div class="empty"><Icon name="shield" size={64} /><h2>{strings.emptyTitle}</h2><p class="lead">{protecting ? strings.emptyText : strings.emptyStopped}</p></div>
+      <div class="empty"><Icon name="shield" size={64} /><h2>{strings.emptyTitle}</h2><p class="lead">{protecting ? strings.emptyText : strings.emptyStopped}</p><p class="platform-note">{strings.holdGap}</p></div>
     {/if}
     {#if !home}<div class="steps" aria-label={progress(strings.step, step + 1, 4)}>{#each [0, 1, 2, 3] as index}<i class:done={index < step} class:now={index === step}></i>{/each}<span>{progress(strings.step, step + 1, 4)}</span></div>{/if}
   </section>
@@ -232,6 +300,14 @@
     <button class="btn danger" onclick={restoreAttachment}>{strings.restore}</button>
     <!-- svelte-ignore a11y_autofocus (A modal dialog must focus its safe default action.) -->
     <button class="btn primary" autofocus onclick={() => restoreDialog.close()}>{strings.keep}</button>
+  </div>
+</dialog>
+<dialog class="dialog" bind:this={openAnywayDialog} aria-labelledby="open-anyway-title" aria-describedby="open-anyway-body">
+  <h3 id="open-anyway-title">{strings.openAnywayTitle}</h3><div class="fname">{openAnywayTarget?.name}</div><p id="open-anyway-body">{strings.openAnywayText}</p>
+  <div class="actions">
+    <button class="btn danger" onclick={openAnyway}>{strings.openAnyway}</button>
+    <!-- svelte-ignore a11y_autofocus (A modal dialog must focus its safe default action.) -->
+    <button class="btn primary" autofocus onclick={() => openAnywayDialog.close()}>{strings.keepHeld}</button>
   </div>
 </dialog>
 <dialog class="dialog" bind:this={detailsDialog} aria-labelledby="details-title"><h3 id="details-title">{strings.details}</h3><p class="raw-details">{detailText}</p><div class="actions"><button class="btn quiet" onclick={() => detailsDialog.close()}>{strings.close}</button></div></dialog>

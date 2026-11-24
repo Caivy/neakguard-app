@@ -73,3 +73,9 @@ dialog::backdrop { background: rgba(5, 16, 38, .55); }
 :root:lang(en) :is(h2, .lead, .btn, .state, .state-sub, .tip p, .item .w, .list-sub, .dialog h3, .dialog p, .picture-caption, .comic .fn, .verdict b, .verdict span) { line-height: 1.5; }
 .verdict img { height: 52px; object-fit: contain; }
 .dl { color: #fff; }
+.item .fic.held { background: #fff4d1; color: #7a5600; }
+.held-count { background: #fff4d1; color: #7a5600; }
+.tabs { display: flex; gap: 4px; align-self: flex-start; background: var(--paper); border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
+.tabs button { border: 0; background: transparent; padding: 5px 14px; border-radius: 999px; font-size: 14px; color: var(--ink-2); }
+.tabs button.on { background: var(--naga); color: #fff; }
+.items + .platform-note { margin-top: 12px; }

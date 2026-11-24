@@ -10,7 +10,9 @@ fn main() {
         start_broker,
         configure_folder,
         list_quarantine,
-        restore_attachment
+        restore_attachment,
+        open_anyway,
+        set_language
     ]);
     app.run(tauri::generate_context!())
         .expect("NeakGuard App could not start");
@@ -56,4 +58,19 @@ async fn list_quarantine(app: tauri::AppHandle) -> Result<Vec<broker::Quarantine
 #[tauri::command]
 async fn restore_attachment(app: tauri::AppHandle, id: String) -> Result<(), String> {
     broker::restore(&state(&app)?, &id).map_err(|error| format!("{error:#}"))
+}
+
+/// Record the user's Open Anyway decision for one held Uninspected Attachment version.
+#[cfg(windows)]
+#[tauri::command]
+async fn open_anyway(app: tauri::AppHandle, fingerprint: String) -> Result<(), String> {
+    broker::open_anyway_held(&state(&app)?, &fingerprint).map_err(|error| format!("{error:#}"))
+}
+
+/// Tell the Broker the language of the NeakGuard App (`en` or `km`), so that its notifications
+/// use the same language.
+#[cfg(windows)]
+#[tauri::command]
+async fn set_language(app: tauri::AppHandle, language: String) -> Result<(), String> {
+    broker::set_language(&state(&app)?, &language).map_err(|error| format!("{error:#}"))
 }
