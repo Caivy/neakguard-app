@@ -1,0 +1,18 @@
+[package]
+name = "neakguard"
+version = "0.1.4"
+edition.workspace = true
+publish.workspace = true
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-dialog = "2"
+
+[target.'cfg(windows)'.dependencies]
+neakguard-broker = { path = "../../crates/neakguard-broker-stub" }
+
+[lints]
+workspace = true

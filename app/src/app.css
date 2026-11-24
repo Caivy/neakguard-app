@@ -1,0 +1,75 @@
+@font-face { font-family: 'Onest'; src: url('@fontsource-variable/onest/files/onest-latin-wght-normal.woff2') format('woff2'); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: 'MiSans Khmer'; src: url('/fonts/MiSansKhmer-Regular.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'MiSans Khmer'; src: url('/fonts/MiSansKhmer-Medium.woff2') format('woff2'); font-weight: 500; font-display: swap; }
+@font-face { font-family: 'MiSans Khmer'; src: url('/fonts/MiSansKhmer-Semibold.woff2') format('woff2'); font-weight: 600; font-display: swap; }
+@font-face { font-family: 'MiSans Khmer'; src: url('/fonts/MiSansKhmer-Bold.woff2') format('woff2'); font-weight: 700; font-display: swap; }
+:root { --font: 'MiSans Khmer', 'Onest', system-ui, sans-serif; color: var(--ink); background: var(--mist); font-synthesis: none; }
+body { font-size: 15px; line-height: 1.8; overflow-wrap: anywhere; }
+:lang(en) { line-height: 1.5; }
+button, input { font: inherit; }
+button { cursor: pointer; }
+button:disabled { opacity: .45; cursor: default; }
+:is(button, input, label):focus-visible, .lang-card:focus-within { outline: 3px solid #2a62ff; outline-offset: 3px; }
+.win { border-radius: 0; box-shadow: none; grid-template-rows: minmax(0, 1fr); }
+.work { min-height: 0; }
+.brand, .folder-chip .p, .found code, .item .n, .count, .dialog .fname, .chat .meta { font-family: 'Onest', var(--font); }
+.folder-chip .p, .found code { word-break: normal; overflow-wrap: anywhere; }
+.folder-info, .attachment { min-width: 0; }
+.brand img { height: 30px; object-fit: contain; }
+.medal.setup::before { content: ''; position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 0 2px #ffbc0059, 0 0 60px 6px #ffbc0038; }
+.guard-body { gap: 18px; }
+.guard-foot svg { flex: none; margin-top: 4px; }
+.folder-chip svg { color: var(--gold); }
+.state { font-size: 26px; line-height: 1.8; }
+.guard .btn { justify-content: center; width: 100%; padding: 14px 16px; }
+.lang button { border: 0; background: transparent; padding: 5px 14px; border-radius: 999px; font-size: 14px; color: var(--ink-2); }
+.lang button.on { background: var(--naga); color: #fff; }
+h2 { line-height: 1.8; }
+.btn { line-height: 1.8; justify-content: center; }
+.welcome-content { margin-top: 56px; }
+.intro-lead { margin-top: 6px; }
+.lang-card { cursor: pointer; position: relative; }
+.lang-card input { float: right; accent-color: var(--naga); width: 22px; height: 22px; margin: 0; }
+.lesson-title { margin-top: 2px; }
+.picture-caption { font-size: 14px; color: var(--ink-2); line-height: 1.75; }
+.danger-caption { color: var(--lotus); font-weight: 600; }
+.inside-panel { border-color: #e9b8c1; }
+.inside { border: 1px solid var(--line); }
+.inside .row svg { color: var(--lotus); }
+.comic .file { grid-template-columns: 40px minmax(0, 1fr); }
+.comic .panel { min-width: 0; }
+.comic .fn { font-size: 17px; }
+.comic .cap2 { line-height: 1.8; }
+.comic .dl { width: 36px; height: 36px; }
+.lesson-actions { margin-top: 18px; }
+.folder-title { margin-top: 6px; }
+.ready-title { margin-top: 30px; }
+.back-link { color: var(--ink-2); margin-top: 14px; align-self: flex-start; font-weight: 500; }
+.platform-note { margin-top: 14px; font-size: 13px; color: var(--ink-2); }
+.tip { border-color: var(--gold); }
+.tip .fi { background: #fff4d1; color: #7a5600; }
+.tip p { font-size: 15px; color: var(--ink-2); line-height: 1.8; }
+.item { grid-template-columns: 36px minmax(0, 1fr) auto; gap: 10px; padding: 10px 12px; }
+.item .fic { width: 36px; height: 40px; color: var(--lotus); }
+.item .w { line-height: 1.75; }
+.item .btn { padding: 9px 12px; }
+.list-head { gap: 12px; }
+.list-head h2 { line-height: 1.8; }
+.empty h2 { font-size: 24px; }
+.details-link { color: var(--ink); display: block; }
+.problem { font-size: 13px; line-height: 1.75; padding: 8px 12px; }
+.problem .details-link { padding: 2px 0; line-height: 1.75; }
+.work:has(.problem) .item { padding-top: 8px; padding-bottom: 8px; }
+.work:has(.problem) .items { gap: 8px; }
+.pager { flex-shrink: 0; }
+.problem + .list-head { margin-top: 16px; }
+dialog.dialog { color: var(--ink); border: 0; margin: auto; max-height: 620px; overflow: auto; }
+dialog::backdrop { background: rgba(5, 16, 38, .55); }
+.dialog h3 { line-height: 1.8; }
+.dialog .fname { overflow-wrap: anywhere; }
+.dialog .actions { flex-wrap: wrap; }
+.dialog .actions .btn { font-size: 15px; padding: 12px 16px; }
+.raw-details { white-space: pre-wrap; margin-top: 16px; overflow-wrap: anywhere; }
+:root:lang(en) :is(h2, .lead, .btn, .state, .state-sub, .tip p, .item .w, .list-sub, .dialog h3, .dialog p, .picture-caption, .comic .fn, .verdict b, .verdict span) { line-height: 1.5; }
+.verdict img { height: 52px; object-fit: contain; }
+.dl { color: #fff; }
