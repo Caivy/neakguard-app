@@ -175,6 +175,12 @@ importers:
       '@tauri-apps/plugin-dialog':
         specifier: ^2.8.4
         version: 2.8.4
+      '@ui-sdk/core':
+        specifier: 0.1.0-beta.16
+        version: 0.1.0-beta.16
+      '@ui-sdk/svelte':
+        specifier: 0.1.0-beta.16
+        version: 0.1.0-beta.16(@ui-sdk/core@0.1.0-beta.16)(svelte@5.59.1)
     devDependencies:
       '@sveltejs/vite-plugin-svelte':
         specifier: ^6
@@ -614,6 +620,15 @@ packages:
   '@types/estree@1.0.10':
     resolution: {integrity: sha512-lTyOMnOcmRBzdCv6/4zUZCrEhV0xrqQiUZBZtVcbmLHBXKLnN8q89v/wKRF/Q0HbwVsqbIG3o5HDoFl9sduM+g==}
 
+  '@ui-sdk/core@0.1.0-beta.16':
+    resolution: {integrity: sha512-I2GMqOviLS/lYfIj2lTqKLbae0V9uSnysK+bSdbhuw2De8zNvrLZiDTc0qzsPNiZvB/bMmUZJS5UDA5Q2Pq4Ng==}
+
+  '@ui-sdk/svelte@0.1.0-beta.16':
+    resolution: {integrity: sha512-GSU4G5UaniG/XUCJCIClFa0QBnitLV0d2BxavEJsQ4T6uu0r4n3pwmbEHd48a5H0qfiIqaDhPCHcMk/dJkzWCQ==}
+    peerDependencies:
+      '@ui-sdk/core': ^0.1.0-beta.16
+      svelte: '>=5.33'
+
   acorn@8.19.0:
     resolution: {integrity: sha512-oJlA3XiRm7Cyk6qFD2Jn8ak9B7jSy0qy00ADO3+8dpT0LSjFihQYv4C02LFCSYJV3Q37xYwwRy5m+IpIiUzqWw==}
     engines: {node: '>=0.4.0'}
@@ -1019,6 +1034,13 @@ snapshots:
       '@tauri-apps/api': 2.12.5
 
   '@types/estree@1.0.10': {}
+
+  '@ui-sdk/core@0.1.0-beta.16': {}
+
+  '@ui-sdk/svelte@0.1.0-beta.16(@ui-sdk/core@0.1.0-beta.16)(svelte@5.59.1)':
+    dependencies:
+      '@ui-sdk/core': 0.1.0-beta.16
+      svelte: 5.59.1
 
   acorn@8.19.0: {}
 

@@ -6,7 +6,8 @@
   import './design.css'
   import './app.css'
   import Icon from './Icon.svelte'
-  import { canOpenAnyway, heldFilesOf, holdMessageKey } from './held.js'
+  import { canDismiss, canOpenAnyway, dismissKey, heldFilesOf, holdIconName, holdMessageKey, loadDismissed, saveDismissed } from './held.js'
+  import { problemOf, refreshed } from './refresh.js'
   import en from './i18n/en.json'
   import km from './i18n/km.json'
 
@@ -19,7 +20,8 @@
   let quarantine = $state([])
   let busy = $state(false)
   let error = $state('')
-  let refreshError = $state('')
+  let statusError = $state('')
+  let listError = $state('')
   let page = $state(0)
   let detailsDialog = $state()
   let restoreDialog = $state()
@@ -27,18 +29,20 @@
   let openAnywayDialog = $state()
   let openAnywayTarget = $state(null)
   let openRequested = $state({})
+  let dismissed = $state(loadDismissed())
   let view = $state('held')
   let heldPage = $state(0)
   let detailText = $state('')
   const strings = $derived(language === 'km' ? km : en)
   const home = $derived(step === 4)
-  const problem = $derived(error || refreshError || status.error || '')
+  // Only a failed status is a problem. A failed Quarantine list is a message on the list.
+  const problem = $derived(problemOf({ error, statusError, status }))
   const protecting = $derived(Boolean(status.running) && !problem)
   const pageCount = $derived(Math.max(1, Math.ceil(quarantine.length / 4)))
   const currentPage = $derived(Math.min(page, pageCount - 1))
   const visibleAttachments = $derived(quarantine.slice(currentPage * 4, (currentPage + 1) * 4))
   // The Broker still holds these files while it reports an operational error, so keep them listed.
-  const heldFiles = $derived(heldFilesOf(status))
+  const heldFiles = $derived(heldFilesOf(status, dismissed))
   const heldPageCount = $derived(Math.max(1, Math.ceil(heldFiles.length / 3)))
   const currentHeldPage = $derived(Math.min(heldPage, heldPageCount - 1))
   const visibleHeld = $derived(heldFiles.slice(currentHeldPage * 3, (currentHeldPage + 1) * 3))
@@ -74,11 +78,7 @@
   }
 
   async function refresh() {
-    try {
-      status = await invoke('protection_status')
-      quarantine = status.folder ? await invoke('list_quarantine') : []
-      refreshError = ''
-    } catch (cause) { refreshError = String(cause) }
+    ;({ status, quarantine, statusError, listError } = await refreshed(invoke, { status, quarantine, statusError, listError }))
   }
 
   function setLanguage(value) {
@@ -132,6 +132,13 @@
     try { await invoke('start_broker'); await refresh() }
     catch (cause) { error = String(cause) }
     finally { busy = false }
+  }
+
+  // The antivirus decided about this file, so there is nothing to confirm. Only this App hides
+  // the row. The Broker keeps it until it restarts.
+  function dismiss(file) {
+    dismissed = new Set([...dismissed, dismissKey(file)])
+    saveDismissed(dismissed)
   }
 
   function confirmRestore(entry) {
@@ -268,8 +275,10 @@
       <p class="list-sub">{strings.holdText}</p>
       <ul class="items">
         {#each visibleHeld as file (file.path + file.fingerprint)}
-          <li class="item"><span class="fic held"><Icon name={file.state === 'unprotected' ? 'info' : 'timer'} size={22} /></span><div class="attachment"><div class="n" title={file.name}>{file.name}</div><div class="w">{heldStatus(file)}</div>{#if file.detail}<button class="link-btn" onclick={() => showDetails(file.detail)}>{strings.details}</button>{/if}</div>
-            {#if canOpenAnyway(file)}
+          <li class="item"><span class="fic held"><Icon name={holdIconName(file)} size={22} /></span><div class="attachment"><div class="n" title={file.name}>{file.name}</div><div class="w">{heldStatus(file)}</div>{#if file.detail}<button class="link-btn" onclick={() => showDetails(file.detail)}>{strings.details}</button>{/if}</div>
+            {#if canDismiss(file)}
+              <button class="btn quiet" onclick={() => dismiss(file)}>{strings.dismiss}</button>
+            {:else if canOpenAnyway(file)}
               {#if openRequested[file.fingerprint]}<span class="w">{strings.holdOpening}</span>{:else}<button class="btn danger" disabled={busy} onclick={() => confirmOpenAnyway(file)}>{strings.openAnyway}</button>{/if}
             {/if}
           </li>
@@ -281,6 +290,7 @@
       {@render tabs()}
       <div class="list-head"><h2>{strings.quarantine}</h2><span class="count">{number(quarantine.length)}</span></div>
       <p class="list-sub">{protecting ? strings.quarantineText : strings.quarantineStopped}</p>
+      {#if listError}<p class="platform-note list-error" role="status">{strings.quarantineListError}<button class="link-btn" onclick={() => showDetails(listError)}>{strings.details}</button></p>{/if}
       <ul class="items">
         {#each visibleAttachments as entry (entry.id)}
           <li class="item"><span class="fic"><Icon name="file" size={22} /></span><div class="attachment"><div class="n" title={entry.name}>{entry.name}</div><div class="w">{strings.suspicious}</div></div><button class="btn danger" disabled={busy} onclick={() => confirmRestore(entry)}>{strings.restore}</button></li>
@@ -288,7 +298,7 @@
       </ul>
       <nav class="pager" aria-label={strings.quarantine}><span>{progress(strings.page, currentPage + 1, pageCount)}</span><div class="pb"><button disabled={currentPage === 0} onclick={() => page = currentPage - 1}>{strings.previous}</button><button disabled={currentPage === pageCount - 1} onclick={() => page = currentPage + 1}>{strings.nextPage}</button></div></nav>
     {:else}
-      <div class="empty"><Icon name="shield" size={64} /><h2>{strings.emptyTitle}</h2><p class="lead">{protecting ? strings.emptyText : strings.emptyStopped}</p><p class="platform-note">{strings.holdGap}</p></div>
+      <div class="empty"><Icon name="shield" size={64} /><h2>{strings.emptyTitle}</h2><p class="lead">{protecting ? strings.emptyText : strings.emptyStopped}</p><p class="platform-note">{strings.holdGap}</p>{#if listError}<p class="platform-note list-error" role="status">{strings.quarantineListError}<button class="link-btn" onclick={() => showDetails(listError)}>{strings.details}</button></p>{/if}</div>
     {/if}
     {#if !home}<div class="steps" aria-label={progress(strings.step, step + 1, 4)}>{#each [0, 1, 2, 3] as index}<i class:done={index < step} class:now={index === step}></i>{/each}<span>{progress(strings.step, step + 1, 4)}</span></div>{/if}
   </section>

@@ -28,12 +28,24 @@ test('NeakGuard App message references exist in both languages', () => {
 test('every state of a Held Attachment has a message in both languages', () => {
   for (const locale of ['en', 'km']) {
     const messages = readLocale(locale)
-    for (const key of ['holdChecking', 'holdSuspicious', 'holdUninspected', 'holdUnprotected']) {
+    for (const key of ['holdChecking', 'holdSuspicious', 'holdUninspected', 'holdUnprotected', 'holdRemovedByAntivirus']) {
       assert.equal(typeof messages[key], 'string', `${locale}.${key}`)
     }
     // A file that is not held has no reason to show.
     assert.doesNotMatch(messages.holdUnprotected, /\{\w+\}/, locale)
+    assert.doesNotMatch(messages.holdRemovedByAntivirus, /\{\w+\}/, locale)
   }
+})
+
+test('a file that the antivirus removed says so and can be dismissed, in both languages', () => {
+  const en = readLocale('en')
+  const km = readLocale('km')
+  assert.equal(en.holdRemovedByAntivirus, 'Your antivirus removed this file.')
+  assert.equal(km.holdRemovedByAntivirus, 'កម្មវិធីកំចាត់មេរោគរបស់អ្នកបានលុបឯកសារនេះ។')
+  assert.equal(en.dismiss, 'Dismiss')
+  assert.equal(km.dismiss, 'បិទ')
+  assert.equal(typeof en.quarantineListError, 'string')
+  assert.equal(typeof km.quarantineListError, 'string')
 })
 
 test('every reason an Attachment can stay Uninspected has a message in both languages', () => {
