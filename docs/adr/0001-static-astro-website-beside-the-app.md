@@ -1,0 +1,3 @@
+# Static Astro website beside the App
+
+The NeakGuard Website lives in `site/` as its own pnpm package, separate from `app/`, and builds to static HTML with Astro. Khmer is at `/` and English at `/en/`. Svelte with ui-sdk is used only for the few interactive islands (FAQ accordion, App screenshot tabs); everything else is `.astro` with Tailwind v4, so the page ships almost no JavaScript. We kept it out of `app/` and out of a shared workspace so the Website's dependencies (Astro, Tailwind) never enter the Tauri App's build or lockfile. It keeps the brand navy and gold from `app/src/design.css` rather than the black and blue of the reference design it borrows its layout from.
