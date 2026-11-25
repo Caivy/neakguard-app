@@ -3,3 +3,6 @@
 /app/dist/
 /app/src-tauri/gen/
 /app/src-tauri/binaries/
+/site/node_modules/
+/site/dist/
+/site/.astro/

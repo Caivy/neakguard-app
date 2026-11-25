@@ -1,0 +1,287 @@
+---
+import "../styles/global.css";
+import { DOWNLOAD_URL, RELEASE_URL, SOURCE_URL } from "../config";
+import { LOCALES, otherLang, t, type Lang } from "../i18n";
+import Faq from "./Faq.svelte";
+import ScreenTabs from "./ScreenTabs.svelte";
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const other = otherLang(lang);
+
+const tiles = [
+  { name: t(lang, "tileName1"), type: ".exe", place: "xl:top-16 xl:left-[3%] xl:-rotate-6" },
+  { name: "photo_2025.jpg", type: ".scr", place: "xl:top-64 xl:left-[7%] xl:rotate-3" },
+  { name: "invoice.docx", type: ".lnk", place: "xl:top-[27rem] xl:left-[2%] xl:-rotate-2 max-sm:hidden" },
+  { name: "song.mp3", type: ".com", place: "xl:top-28 xl:right-[4%] xl:rotate-6" },
+  { name: "ABA_statement.pdf", type: ".bat", place: "xl:top-80 xl:right-[7%] xl:-rotate-3 max-sm:hidden" },
+];
+
+const shots = (["km", "en"] as const).map((value) => ({
+  value,
+  label: LOCALES[value].label,
+  src: `/screens/${value}-home.png`,
+  alt: t(lang, value === "km" ? "altHomeKm" : "altHomeEn"),
+}));
+
+const faqItems = [1, 2, 3, 4, 5].map((n) => ({
+  value: `faq${n}`,
+  question: t(lang, `faq${n}Q` as "faq1Q"),
+  answer: t(lang, `faq${n}A` as "faq1A"),
+}));
+
+const steps = ([1, 2, 3] as const).map((n) => ({
+  title: t(lang, `step${n}Title`),
+  text: t(lang, `step${n}Text`),
+  points: ([1, 2, 3] as const).map((p) => t(lang, `step${n}Point${p}`)),
+}));
+
+const watchedFiles = [
+  { name: "photo_2025.jpg", verdict: t(lang, "visualNoFindings"), tone: "border border-line text-river" },
+  { name: t(lang, "tileName1"), verdict: t(lang, "visualSuspicious"), tone: "bg-lotus text-white" },
+  { name: "family_photos.zip", verdict: t(lang, "visualUninspected"), tone: "border border-river/40 text-white" },
+];
+
+const linkClass = "rounded-sm text-river transition-colors hover:text-white";
+const underlined = `${linkClass} underline decoration-river/40 underline-offset-4`;
+---
+
+<!doctype html>
+<html lang={LOCALES[lang].htmlLang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#051026" />
+    <meta name="color-scheme" content="dark" />
+    <title>{t(lang, "metaTitle")}</title>
+    <meta name="description" content={t(lang, "metaDescription")} />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    {lang === "km" && <link rel="preload" href="/fonts/MiSansKhmer-Regular.woff2" as="font" type="font/woff2" crossorigin />}
+    {lang === "km" && <link rel="preload" href="/fonts/MiSansKhmer-Bold.woff2" as="font" type="font/woff2" crossorigin />}
+  </head>
+  <body class="min-h-screen antialiased">
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:fixed focus:start-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-gold focus:px-4 focus:py-2 focus:text-gold-ink"
+    >
+      {t(lang, "skipToContent")}
+    </a>
+
+    <header class="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-5 sm:px-6">
+      <a href={LOCALES[lang].path} class="flex items-center gap-2.5 rounded-sm font-semibold tracking-tight">
+        <img src="/brand/neakguard-shield.svg" alt="" aria-hidden="true" width="28" height="28" class="size-7" />
+        NeakGuard
+      </a>
+      <nav aria-label={t(lang, "navLabel")} class="flex items-center gap-4 text-sm sm:gap-6 sm:text-base">
+        <a href={LOCALES[other].path} hreflang={LOCALES[other].htmlLang} lang={LOCALES[other].htmlLang} class={linkClass}>{LOCALES[other].label}</a>
+        <a href={DOWNLOAD_URL} class={linkClass}>{t(lang, "navDownload")}</a>
+        <a href={SOURCE_URL} class={linkClass}>{t(lang, "navSource")}</a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="relative overflow-x-clip px-4 pb-16 pt-14 text-center sm:px-6 sm:pt-20 xl:pb-24 xl:pt-24">
+        <div class="grid-backdrop pointer-events-none absolute inset-x-0 top-0 h-[36rem]" aria-hidden="true"></div>
+
+        <div class="reveal relative z-10 mx-auto max-w-[44rem]">
+          <h1 class="text-[clamp(2.25rem,7vw,4.75rem)] font-bold leading-display [&:lang(km)]:text-[clamp(2.25rem,6vw,4rem)] tracking-tight text-white">
+            {t(lang, "heroTitle")}
+          </h1>
+          <p class="mx-auto mt-6 max-w-[36rem] text-lg text-river sm:text-xl">{t(lang, "heroLead")}</p>
+          <div class="mt-9 flex flex-col items-center gap-4">
+            <a
+              href={DOWNLOAD_URL}
+              class="inline-flex items-center gap-2.5 rounded-xl bg-gold px-6 py-3.5 text-lg font-semibold text-gold-ink transition hover:brightness-110"
+            >
+              <svg viewBox="0 0 24 24" class="size-5" fill="currentColor" aria-hidden="true">
+                <path d="M3 5.4 10.2 4.4v6.8H3zm8.2-1.1L21 3v8.2h-9.8zM3 12.8h7.2v6.8L3 18.6zm8.2 0H21V21l-9.8-1.3z" />
+              </svg>
+              {t(lang, "downloadButton")}
+            </a>
+            <p class="flex flex-wrap justify-center gap-x-6 gap-y-2">
+              <a href={RELEASE_URL} class={underlined}>{t(lang, "otherDownloads")}</a>
+              <a href={SOURCE_URL} class={underlined}>{t(lang, "sourceLink")}</a>
+            </p>
+          </div>
+        </div>
+
+        <ul class="mx-auto mt-14 flex max-w-xl flex-wrap justify-center gap-3 xl:mt-0 xl:max-w-none" aria-hidden="true">
+          {
+            tiles.map((tile) => (
+              <li
+                data-tile
+                class={`reveal flex max-w-[16rem] items-center gap-3 rounded-xl border border-line bg-naga-2 p-3 text-start shadow-xl shadow-black/30 xl:absolute ${tile.place}`}
+              >
+                <svg viewBox="0 0 24 24" class="size-8 shrink-0 text-river" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
+                  <path d="M6 3h8l4 4v14H6z" />
+                  <path d="M14 3v4h4" />
+                </svg>
+                <span class="min-w-0">
+                  <span class="block break-words text-sm font-medium leading-snug text-white">{tile.name}</span>
+                  <span data-real-type class="mt-1 inline-block rounded bg-lotus px-1.5 py-0.5 font-sans text-xs font-semibold leading-none text-white">{tile.type}</span>
+                </span>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+
+      <section class="border-t border-line" aria-labelledby="screens-title">
+        <div class="mx-auto w-full max-w-6xl px-4 py-20 sm:px-6 md:py-28">
+          <div class="mx-auto max-w-xl text-center">
+            <h2 id="screens-title" class="text-2xl font-bold leading-heading sm:text-3xl">{t(lang, "screensTitle")}</h2>
+            <p class="mt-3 text-river">{t(lang, "screensLead")}</p>
+          </div>
+          <div class="mx-auto mt-10 max-w-[60rem]">
+            <ScreenTabs client:visible lang={lang} shots={shots} label={t(lang, "screensTabsLabel")} width={960} height={680} />
+          </div>
+        </div>
+      </section>
+
+      <div class="border-t border-line [counter-reset:step]">
+        <h2 class="mx-auto max-w-6xl px-4 pt-20 text-center text-2xl font-bold leading-heading sm:px-6 sm:text-3xl md:pt-28">
+          {t(lang, "howTitle")}
+        </h2>
+        {
+          steps.map((step, index) => (
+            <section data-step class={index > 0 ? "border-t border-line" : ""} aria-labelledby={`step${index + 1}-title`}>
+              <div class="mx-auto grid w-full max-w-6xl items-center gap-10 px-4 py-16 sm:px-6 md:grid-cols-2 md:gap-16 md:py-24">
+                <div data-step-visual class={index % 2 === 1 ? "md:order-2" : ""}>
+                  {index === 0 && (
+                    <div class="rounded-2xl border border-line bg-naga-2/60 p-5 shadow-2xl shadow-black/30">
+                      <div class="flex items-center justify-between gap-3">
+                        <span class="flex min-w-0 items-center gap-2.5 font-semibold">
+                          <svg viewBox="0 0 24 24" class="size-5 shrink-0 text-gold" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M3 6.5A1.5 1.5 0 0 1 4.5 5H9l2 2.5h8.5A1.5 1.5 0 0 1 21 9v9.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5z" />
+                          </svg>
+                          Telegram Desktop
+                        </span>
+                        <span class="flex shrink-0 items-center gap-2 text-sm text-river">
+                          <span class="size-2 rounded-full bg-gold" aria-hidden="true" />
+                          {t(lang, "visualWatching")}
+                        </span>
+                      </div>
+                      <p class="mt-1 break-all text-sm text-river">C:\Users\Dara\Downloads\Telegram Desktop</p>
+                      <ul class="mt-5 divide-y divide-line rounded-xl border border-line bg-naga/60 text-sm">
+                        {watchedFiles.map((file) => (
+                          <li class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 px-4 py-3">
+                            <span class="min-w-0 break-all text-white">{file.name}</span>
+                            <span class={`shrink-0 rounded-md px-2 py-0.5 text-xs font-medium ${file.tone}`}>{file.verdict}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {index === 1 && (
+                    <div class="rounded-2xl border border-line bg-naga-2/60 p-5 shadow-2xl shadow-black/30">
+                      <p class="break-all font-semibold text-white">{t(lang, "tileName1")}</p>
+                      <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
+                        <div class="rounded-xl border border-line bg-naga/60 p-4">
+                          <p class="text-river">{t(lang, "visualWhatYouSee")}</p>
+                          <p class="mt-1 font-semibold text-white">{t(lang, "visualPdf")}</p>
+                        </div>
+                        <div class="rounded-xl border border-lotus bg-naga/60 p-4">
+                          <p class="text-river">{t(lang, "visualWhatsInside")}</p>
+                          <p class="mt-1 font-semibold text-white">{t(lang, "visualProgram")}</p>
+                        </div>
+                      </div>
+                      <div class="mt-3 rounded-xl border-s-4 border-lotus bg-naga/60 px-4 py-3 text-sm">
+                        <p class="text-river">{t(lang, "visualFinding")}</p>
+                        <p class="mt-1 text-white">{t(lang, "findingExample")}</p>
+                      </div>
+                    </div>
+                  )}
+                  {index === 2 && (
+                    <div class="flex flex-col items-center">
+                      <div class="w-full rounded-2xl border border-line bg-naga-2/60 p-5 shadow-2xl shadow-black/30">
+                        <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-naga/60 px-4 py-3">
+                          <span class="flex min-w-0 items-center gap-3">
+                            <svg viewBox="0 0 24 24" class="size-7 shrink-0 text-lotus" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true">
+                              <path d="M6 3h8l4 4v14H6z" />
+                              <path d="M14 3v4h4" />
+                            </svg>
+                            <span class="min-w-0">
+                              <span class="block break-all text-sm font-medium text-white">{t(lang, "tileName1")}</span>
+                              <span class="block text-xs text-river">{t(lang, "visualMovedAway")}</span>
+                            </span>
+                          </span>
+                          <span class="shrink-0 rounded-lg border border-line px-3 py-1.5 text-sm text-white">{t(lang, "visualRestore")}</span>
+                        </div>
+                      </div>
+                      <span class="flex flex-col items-center" aria-hidden="true">
+                        <span class="size-2 rounded-full bg-river/50" />
+                        <span class="h-10 w-px bg-river/40" />
+                        <span class="size-2 rounded-full bg-river/50" />
+                      </span>
+                      <span class="mt-2 inline-flex items-center gap-2.5 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-naga shadow-xl shadow-black/30">
+                        <svg viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <path d="M12 3 4.5 6v5.5c0 4.4 3.1 8.2 7.5 9.5 4.4-1.3 7.5-5.1 7.5-9.5V6z" />
+                          <path d="m9 12 2 2 4-4" />
+                        </svg>
+                        {t(lang, "visualInQuarantine")}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <span class="step-number grid size-9 place-items-center rounded-full border border-line font-sans text-sm font-semibold text-river" aria-hidden="true" />
+                  <h3 id={`step${index + 1}-title`} class="mt-5 text-3xl font-bold leading-heading tracking-tight sm:text-4xl">{step.title}</h3>
+                  <p class="mt-4 max-w-[34rem] text-lg text-river">{step.text}</p>
+                  <ul data-step-points class="mt-6 space-y-3">
+                    {step.points.map((point) => (
+                      <li class="flex items-start gap-3">
+                        <svg viewBox="0 0 24 24" class="mt-[0.35em] size-4 shrink-0 text-gold" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <path d="m5 12.5 4.5 4.5L19 7.5" />
+                        </svg>
+                        <span>{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </section>
+          ))
+        }
+      </div>
+
+      <section class="border-t border-line" aria-labelledby="note-title">
+        <div class="mx-auto w-full max-w-3xl px-4 py-20 sm:px-6 md:py-28">
+          <div class="rounded-2xl border border-line bg-naga-2 p-6 sm:p-8">
+            <h2 id="note-title" class="text-xl font-bold leading-heading sm:text-2xl">{t(lang, "noteTitle")}</h2>
+            <p class="mt-3 text-white">{t(lang, "noteText")}</p>
+            <p class="mt-3 text-river">{t(lang, "noteNoFindings")}</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="border-t border-line" aria-labelledby="faq-title">
+        <div class="mx-auto w-full max-w-3xl px-4 py-20 sm:px-6 md:py-28">
+          <h2 id="faq-title" class="mb-6 text-center text-2xl font-bold leading-heading sm:text-3xl">{t(lang, "faqTitle")}</h2>
+          <Faq client:visible items={faqItems} label={t(lang, "faqTitle")} />
+        </div>
+      </section>
+    </main>
+
+    <footer class="border-t border-line">
+      <div class="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-8 text-sm text-river sm:px-6">
+        <p class="flex flex-wrap items-center gap-x-6 gap-y-2">
+          <span>© NeakGuard</span>
+          <a href={SOURCE_URL} class={underlined}>{t(lang, "footerSource")}</a>
+        </p>
+        <p>
+          {t(lang, "footerFonts")}{" "}
+          <a href="/fonts/MiSans-LICENSE.pdf" class={underlined}>MiSans Khmer (MiSans Font License)</a>{" "}
+          {t(lang, "footerAnd")}{" "}
+          <a href="/fonts/Onest-OFL.txt" class={underlined}>Onest (SIL Open Font License 1.1)</a>
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>

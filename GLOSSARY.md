@@ -16,6 +16,10 @@ _Avoid_: worker, scanner, engine
 The NeakGuard window, used for onboarding, the Quarantine list and settings. It is opened only when needed and holds no protection logic.
 _Avoid_: UI, frontend, dashboard
 
+**NeakGuard Website**:
+The public web page that explains NeakGuard and links to a NeakGuard release. It holds no protection logic.
+_Avoid_: landing page, homepage, marketing site
+
 ## Files and places
 
 **Watched Folder**:
