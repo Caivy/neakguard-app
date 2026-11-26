@@ -1981,7 +1981,7 @@ dependencies = [
 
 [[package]]
 name = "neakguard"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "neakguard-broker",
  "tauri",
