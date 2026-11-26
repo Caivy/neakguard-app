@@ -68,7 +68,7 @@ describe.each(["km", "en"] as const)("NeakGuard Website built page (%s)", (lang)
     expect(topBar).toHaveLength(1);
     for (const link of [...hero, ...topBar]) {
       expect(link.getAttribute("href")).toBe(
-        "https://github.com/Caivy/neakguard-app/releases/latest/download/NeakGuard-windows-x64-setup.exe",
+        "https://github.com/Caivy/neakguard-app/releases/latest/download/NeakGuard-windows-x64-installer.exe",
       );
     }
   });
